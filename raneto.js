@@ -131,8 +131,6 @@ var raneto = {
 		});
 
 		files.forEach(function(filePath){
-			console.log('filePath ' + filePath);
-
             var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
 				stat = fs.lstatSync(filePath);
 
@@ -213,6 +211,68 @@ var raneto = {
 		});
 
 		return filesProcessed;
+	},
+
+	getCategoryPages: function(category) {
+		var page_sort_meta = raneto.config.page_sort_meta || '',
+			url = raneto.config.content_dir + category + '**/*',
+			files = glob.sync(url),
+			categoryProcessed = {
+				slug: category,
+				title: _s.titleize(_s.humanize(path.basename(category))),
+				is_index: false,
+				class: 'category-'+ raneto.cleanString(category),
+				sort: 0,
+				files: []
+			};
+
+		files.forEach(function(filePath){
+
+            var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
+				stat = fs.lstatSync(filePath);
+
+			if(stat.isSymbolicLink()) {
+				stat = fs.lstatSync(fs.readlinkSync(filePath));
+			}
+
+			if(stat.isFile() && path.extname(shortPath) == '.md'){
+				try {
+					var file = fs.readFileSync(filePath),
+						slug = shortPath,
+						pageSort = 0;
+
+					if(shortPath.indexOf('index.md') > -1){
+						slug = slug.replace('index.md', '');
+					}
+					slug = slug.replace('.md', '').trim();
+
+					var dir = path.dirname(shortPath),
+						meta = raneto.processMeta(file.toString('utf-8')),
+						content = raneto.stripMeta(file.toString('utf-8'));
+					content = raneto.processVars(content);
+					var html = marked(content);
+
+					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
+
+					var chunks = slug.split('/');
+					
+					categoryProcessed.files.push({
+						slug: slug,
+						category_slug: (chunks.length == 1) ? '' : chunks[0],
+						page_slug: (chunks.length == 1) ? chunks[0] : chunks[1],
+						title: meta.title ? meta.title : raneto.slugToTitle(slug),
+						active: false,
+						sort: pageSort,
+						excerpt: _s.prune(_s.stripTags(_s.unescapeHTML(html)), (raneto.config.excerpt_length || 400))
+					});
+				}
+				catch(e){
+					if(raneto.config.debug) console.log(e);
+				}
+			}
+		});
+
+		return categoryProcessed;
 	},
 
 	// Index and search contents
