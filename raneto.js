@@ -14,6 +14,8 @@ var raneto = {
 	config: {
 		// The base URL of your site (allows you to use %base_url% in Markdown files)
 		base_url: '',
+		// Include files on the root folder
+		include_category_index: true,
 		// The base URL of your images folder (allows you to use %image_url% in Markdown files)
 		image_url: '/images',
 		// Excerpt length (used in search)
@@ -115,6 +117,7 @@ var raneto = {
 		activePageSlug = activePageSlug || '';
 		var page_sort_meta = raneto.config.page_sort_meta || '',
 			category_sort = raneto.config.category_sort || false,
+			include_category_index = raneto.config.include_category_index,
 			files = glob.sync(raneto.config.content_dir +'**/*'),
 			filesProcessed = [];
 
@@ -128,6 +131,8 @@ var raneto = {
 		});
 
 		files.forEach(function(filePath){
+			console.log('filePath ' + filePath);
+
             var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
 				stat = fs.lstatSync(filePath);
 
@@ -192,6 +197,12 @@ var raneto = {
 				}
 			}
 		});
+
+		if (!include_category_index) {
+			filesProcessed = _.filter(filesProcessed, function(category) {
+				return category.class != 'category-index';
+			});
+		}
 
 		filesProcessed = _.sortBy(filesProcessed, function(cat){ return cat.sort; });
 		filesProcessed.forEach(function(category){
