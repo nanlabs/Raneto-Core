@@ -184,9 +184,12 @@ var raneto = {
 
 					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
 
-					var val = _.find(filesProcessed, function(item){ return item.slug == dir; });
+					var val = _.find(filesProcessed, function(item){ return item.slug == dir; }),
+						chunks = slug.split('/');
 					val.files.push({
 						slug: slug,
+						category_slug: (chunks.length == 1) ? '' : chunks[0],
+						page_slug: (chunks.length == 1) ? chunks[0] : chunks[1],
 						title: meta.title ? meta.title : raneto.slugToTitle(slug),
 						active: (activePageSlug.trim() == '/'+ slug),
 						sort: pageSort
