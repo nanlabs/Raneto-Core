@@ -223,8 +223,16 @@ var raneto = {
 				is_index: false,
 				class: 'category-'+ raneto.cleanString(category),
 				sort: 0,
-				files: []
+				files: [],
+				excerpt: ''
 			};
+
+		try {
+			var categoryProps = JSON.parse(fs.readFileSync(raneto.config.content_dir + category + '/category.json', 'utf8'));
+			categoryProcessed.excerpt = categoryProps.excerpt;
+		} catch (e) {
+			console.log('Nonexistent or invalid category.json file.');
+		}
 
 		files.forEach(function(filePath){
 
@@ -255,7 +263,7 @@ var raneto = {
 					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
 
 					var chunks = slug.split('/');
-					
+
 					categoryProcessed.files.push({
 						slug: slug,
 						category_slug: (chunks.length == 1) ? '' : chunks[0],
