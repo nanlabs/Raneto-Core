@@ -83,6 +83,18 @@ var raneto = {
 		return markdownContent;
 	},
 
+	// Get category.json configuration file, it returns a valid JSON object
+	getCategoryConfig: function(url) {
+		var json = {};
+		try {
+			json = JSON.parse(fs.readFileSync(url + '/category.json', 'utf8'));
+		} catch (e) {
+			if(raneto.config.debug) console.log('Nonexistent or invalid category.json file.');
+		}
+		return json;
+	},
+
+
 	// Get a page
 	getPage: function(filePath) {
 		try {
@@ -147,13 +159,19 @@ var raneto = {
 					return true;
 				}
 
-				if(category_sort){
-					try {
-						var sortFile = fs.readFileSync(raneto.config.content_dir + shortPath +'/sort');
-						sort = parseInt(sortFile.toString('utf-8'), 10);
-					}
-					catch(e){
-						if(raneto.config.debug) console.log(e);
+				if(category_sort) {
+
+					var categoryProps = raneto.getCategoryConfig(raneto.config.content_dir + shortPath);
+					if (categoryProps.sort && !isNaN(categoryProps.sort)) {
+						sort = categoryProps.sort;
+					} else {
+						try {
+							var sortFile = fs.readFileSync(raneto.config.content_dir + shortPath +'/sort');
+							sort = parseInt(sortFile.toString('utf-8'), 10);
+						}
+						catch(e){
+							if(raneto.config.debug) console.log(e);
+						}
 					}
 				}
 
@@ -227,11 +245,9 @@ var raneto = {
 				excerpt: ''
 			};
 
-		try {
-			var categoryProps = JSON.parse(fs.readFileSync(raneto.config.content_dir + category + '/category.json', 'utf8'));
+		var categoryProps = raneto.getCategoryConfig(raneto.config.content_dir + category);
+		if (categoryProps.excerpt) {
 			categoryProcessed.excerpt = categoryProps.excerpt;
-		} catch (e) {
-			console.log('Nonexistent or invalid category.json file.');
 		}
 
 		files.forEach(function(filePath){
