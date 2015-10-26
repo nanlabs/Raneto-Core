@@ -109,10 +109,13 @@ var raneto = {
 			var meta = raneto.processMeta(file.toString('utf-8')),
 				content = raneto.stripMeta(file.toString('utf-8'));
 			content = raneto.processVars(content);
-			var html = marked(content);
+			var html = marked(content),
+				chunks = slug.split('/');
 
 			return {
 				'slug': slug,
+				'category_slug': (chunks.length == 1) ? '' : chunks[0],
+				'page_slug': (chunks.length == 1) ? chunks[0] : chunks[1],
 				'title': meta.title ? meta.title : raneto.slugToTitle(slug),
 				'body': html,
 				'excerpt': _s.prune(_s.stripTags(_s.unescapeHTML(html)), (raneto.config.excerpt_length || 400))
