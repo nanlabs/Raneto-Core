@@ -1,5 +1,10 @@
 *** Raneto Core Changelog ***
 
+2015.10.26 - version 0.4.0
+* [New] Category and page slug properties.
+* [New] Get category page.
+* [New] category.json file to configure category pages.
+
 2015.04.22 - version 0.3.0
 * [New] Add support for symlinks in content dir
 
